@@ -5,6 +5,7 @@
 * Choosing an evaluation metric & error analysis
 * Model selection and versioning for deployment
 
+
 ## Partitioning data
 
 Usually we partition data into train, validation, test. 
@@ -51,15 +52,50 @@ Issue with data partitioning. Traps:
 ### Tips:
 * Pick a single-number evaluation metric. Precision and Recall are two numbers. Use F1 score instead.
 * Try to focus your attention on `one metric` when optimising a model (don't combine many different metrics). If you need to consider other metrics, just determine a minimum threshold for these othere metrics. For example, optimise model accuracy and just set a minimum threshold for inference speed (latency).
+* Be careful with aggregating ratios [see section](#model-diagnosis)
+* Ideally, the evaluation metric should be correlated to the `business outcome`. However, usually we must make a trade-off.
+* Ideally, evaluation metric has to be` human interpretable` (IoU is eaasy to understand).
 
 ### Case study example:
 * In this repository (using AV dataset) we log the model IoU's for person, bicycle, vehicle, road, traffic light, traffic sign and background. These are a lot af metrics. Based on the above tips, we don't want to use all these metrics for model selection (would be confusing) - `choose one`. If stakeholders are really interested in person accuracy, we would optimise for person IoU and set minimum thresholds for all the other IoU metrics. 
+* The above tip can be applied on `W&B` by applying filters to all the sweep runs (eg. background_iou >= 0.8, traffic_light_iou >= 0.1, etc.), and sorting the filter runs by person_iou.
 
-### Applying tips on W&B:
-* Apply filters to all the sweep runs (eg. background_iou >= 0.8, traffic_light_iou >= 0.1, etc.)
+### Log metrics on W&B
+In this repository, metrics could be logged by instanciating the network and passing in `WandbCallback` when training the model (keep in mind that this was based on a FastAI implementation - see [link](../1_build_end2end_prototype/03_TrainBaselineModel.ipynb)). Other frameworks will have different implementations ([link](https://docs.wandb.ai/guides/integrations)).
+
+  
+## Model Registry
+
+Model checkpoints are produced by different training runs or even at the end of each train epoch. These checkpoints are versioned in artifacts. In a model registry we have a collection of model versions accross multiple artifacts that addresses a single usecase. We can pull certain models from the registry to run inference for example.
+
+
+Using model registry : 
+how to register model -learner as an artifact?
+
+Running evaluation :
+retriving evaluation results from saved model artifact (artifact.logged_by())
+
+
+## Error analysis
+
+Look at validation errors (inference vs ground truth) to learn/ gain intuition on where the model is failing. W&B `tables` can facilitate this error analysis process ([see create_row function in utils.py](../2_beyond_baseline_prototype/utils.py) and [wandb page](https://docs.wandb.ai/guides/track/log/media)). 
+
+1. Look at images per class where model goes most wrong (low IoU), and note what might go wrong (high and low confidence mistakes.)
+   * On W&B table, we could go metric by metric (i.e. IoU's), and sort the min ascending and then descending order. Then try to understand why specific images yield bad and good results respectively, for that metric. 
+2. Make categories of why the model is wrong and bucket them (eg. poor lighting, obstructions, etc.). This can unveil biggest areas of improvement.
+3. Fix incorrect labels or remedy issues in your dataset!
+
+
+## Model diagnosis
+
+With metrics like ratios (eg. IoU) we need to be aware of imbalances in terms of how to `aggregate` these metrics eg. weighted or unweighted averaging ([micro or macro](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.jaccard_score.html)). This will depend on how much importance do we want to give to micro vs macro (eg. people might be small in all frames or different sizes in different frames). For example:
+   * Good idea to log a histogram for each class of: number of pixels occupied by a class in a frame vs frame counts.
+   * Imagin the case.. for some reason, the model does not predic road when road is large, possibly cause camera zoomed in (high pixel count occupied by road in a frame). Then, the IoU will look worse (biased) than it really is, because images with a lot of road are weighted significantly higher (and vice versa with small roads).
+
+
+## Final step of model evaluation
+As a final step, we want to compare validation and test metrics. DON'T do this until you have decided that this is the model that you want to use for deployment. This last step is just a final check that there's nothing strange (eg. overfitting, data leakage, etc.).
 
 
 
 
-With metric that are ratios (eg. IoU) need to:
-* Be aware of imbalances in terms of how to aggregate these metrics.

@@ -4,6 +4,7 @@
 - [Partitioning data](#partitioning-data)
 - [Choosing an evaluation metric](#choosing-an-evaluation-metric)
 - [Model Registry](#model-registry)
+- [Running model evaluation](#running-model-evaluation)
 - [Error analysis](#error-analysis)
 - [Model diagnosis](#model-diagnosis)
 - [Final step of model evaluation](#final-step-of-model-evaluation)
@@ -73,14 +74,22 @@ Log metrics on W&B:
   
 # Model Registry
 
-Model checkpoints are produced by different training runs or even at the end of each train epoch. These checkpoints are versioned in artifacts. In a model registry we have a collection of model versions across multiple artifacts that addresses a single usecase. We can pull certain models from the registry to run inference for example.
+Model checkpoints are produced by different training runs or even at the end of each train epoch. These checkpoints are versioned in artifacts. In a [Model Registry](https://docs.wandb.ai/guides/models) we have a `collection` of model versions across multiple artifacts that addresses a single usecase. We can pull certain models from the registry to run inference for example.
 
+Uses of model registry:
+* `Track` and transition state of models across the lifecycle (from training -> evaluation -> testing -> production)
+* `Organise` models and facilitate hand-offs between teams
+* `Centralise` documentation for all models so users understand how they were built and how to use them.
 
-Using model registry :  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-how to register model -learner as an artifact?
+When linking a model weights artifact to a model registry, add an `alias` to indicate downstream consumers what to do with it.
+* For a model obtained from a model optimisation sweep, we might add the alias `staging` -> to indicate to evaluation team that they should run evaluation against this down-selected model.
 
-Running evaluation :!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-retrieving evaluation results from saved model artifact (artifact.logged_by())
+# Running model evaluation
+
+As a sanity check:
+* When evaluating a model, we want to check that the metrics (eg. IoU) obtained by the model during the training run on the validation set, match the metrics obtained by the evaluation run, by running the model (from the model registry - tagged as staged) on the same validation set.
+
+<!-- retrieving evaluation results from saved model artifact (artifact.logged_by()) -->
 
 
 # Error analysis
@@ -88,7 +97,7 @@ retrieving evaluation results from saved model artifact (artifact.logged_by())
 Look at validation errors (inference vs ground truth) to learn/ gain intuition on where the model is failing. W&B `tables` can facilitate this error analysis process ([see create_row function in utils.py](../2_beyond_baseline_prototype/utils.py) and [wandb page](https://docs.wandb.ai/guides/track/log/media)). 
 
 1. Look at images per class where model goes most wrong (low IoU), and note what might go wrong (high and low confidence mistakes.)
-   * On W&B table, we could go metric by metric (i.e. IoU's), and sort the min ascending and then descending order. Then try to understand why specific images yield bad and good results respectively, for that metric. 
+   * On W&B table, we could go metric by metric (i.e. IoU's), and sort them in ascending and then descending order. Then try to understand why specific images yield bad and good results respectively, for that metric. 
 2. Make categories of why the model is wrong and bucket them (eg. poor lighting, obstructions, etc.). This can unveil biggest areas of improvement.
 3. Fix incorrect labels or remedy issues in your dataset!
 

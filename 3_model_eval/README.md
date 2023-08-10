@@ -114,7 +114,7 @@ As a final step, we want to compare validation and test metrics. DON'T do this u
 
 Suggestions when valid vs test don't match:
 * Check for data leakage. Data splitted in the right way?
-* Is the test set different to the train and valid set in some way?
+* Is the test set different to the train and valid set in some way i.e. not drawn from the same distribution? (Adversarial Validation - ML approach to help in this task)
 * Is there a lot of noise in the data? 
   * Might want to do cross-validation to get a range of errors instead of a single point estimate. After cross validation error analysis, are test results within range?
 

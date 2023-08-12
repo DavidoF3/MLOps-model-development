@@ -1,11 +1,11 @@
 # Moving beyond baseline prototype
 
-This sub-directory is about optimising the performance (more specifically the IoU) of a baseline segmentation model developed in [here](../1_build_end2end_prototype/).
+In this sub-directory, the baseline model developed [here](../1_build_end2end_prototype/README.md) is further optimised to achieve higher IOU's on a specific class.
 
 Topics covered:
-* Optimisation of hyperparameters.
-* Analysis and reporting/sharing of optimisation results. 
-* Retraining model with optimised hyperparameters. 
+* Optimisation of hyperparameters using W&B Sweeps (see [sweep config](sweep.yaml)).
+* Analysis and reporting/sharing of optimisation results using W&B Reports (see [report](https://wandb.ai/doc93/mlops-course-001/reports/Sweep-analysis--Vmlldzo1MDY0MTA0)). 
+* Retraining model with optimised hyperparameters (see [train script](train.py)).. 
 
 W&B tools used: 
 * Tables
@@ -14,7 +14,7 @@ W&B tools used:
 * Sweeps
 * Reports
 
-## Notes
+# Commands for running optimisation
 
 ### Basic model training
 
@@ -55,11 +55,11 @@ We can run a sweep agent per GPU. Each run is started in a different terminal.
 CUDA_VISIBLE_DEVICES=<GPU_number> wandb agent <this/will/be/specific/to/sweep> --count 50
 ```
 
-### Visualisation of sweep data
+# Visualisation of sweep data
 
 Example ideas:
 * In the runs panel, delete all columns and only display/ pin columns of interest.
 * Can filter runs by their status eg. finished (ignore incompleted or crashed ones).
 * Can group runs by attribute eg. encoder architecture.
-* In the workspace panel, can add additional axes (of different performance parameters - eg. IoU of a specific class) to the sweep config tracking plot.
+* If dealing with a multi class problem (eg. semantic segmentation), in the workspace panel- go to the sweep config tracking plot and add additional axes of different performance parameters - eg. IoU of a specific class.
 

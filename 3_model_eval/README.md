@@ -1,5 +1,8 @@
 # Model evaluation
 
+In this sub-directory, the optimised model in [here](../2_beyond_baseline_prototype/README.md) is evaluated against a test set.
+
+Topics covered:
 - [Model evaluation](#model-evaluation)
 - [Partitioning data](#partitioning-data)
 - [Choosing an evaluation metric](#choosing-an-evaluation-metric)
@@ -9,8 +12,13 @@
 - [Model diagnosis](#model-diagnosis)
 - [Final step of model evaluation](#final-step-of-model-evaluation)
 
+See W&B report [here](https://wandb.ai/doc93/mlops-course-001/reports/Model-evaluation--Vmlldzo1MTI1Mjcz).
 
-<!-- last summary - useful for contents page !!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+W&B tools used: 
+* Tables
+* Artifacts
+* Reports
+* Model registry
 
 
 # Partitioning data
